@@ -79,6 +79,7 @@ public class ExcelController {
     //导入excel
     @PostMapping("/import")
     public ReturnResult importExcel(@RequestParam("file") MultipartFile file) throws IOException {
+        long l = System.currentTimeMillis();
         String originalFilename = file.getOriginalFilename();
         String suffix = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
         if (file == null || file.isEmpty()) {
@@ -152,6 +153,9 @@ public class ExcelController {
                 outputStream.close();
             }
 
+
+            System.out.println("校验+入库一共耗时："+ (System.currentTimeMillis() - l)/1000 +"s");
+
         } catch (Exception e) {
 
             e.printStackTrace();
@@ -173,8 +177,6 @@ public class ExcelController {
             System.out.println("i==>" + i);
             System.out.println("rowList" + rowList);
             if (rowList.size() > 0 && rowList.get(i) != null) {
-
-
                 obj = rowList.get(i);
                 System.out.println("obj-->" + obj);
             }
