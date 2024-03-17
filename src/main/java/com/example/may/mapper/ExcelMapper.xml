@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.may.mapper.ExcelMapper">
+    <resultMap id="BaseResultMap" type="com.example.may.po.HeadImportDataInfo">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="import_date" property="importDate" jdbcType="VARCHAR"/>
+        <result column="pid_no" property="pidNo" jdbcType="VARCHAR"/>
+        <result column="bank_no" property="bankNo" jdbcType="VARCHAR"/>
+        <result column="bank_name" property="bankName" jdbcType="VARCHAR"/>
+        <result column="reward_point" property="rewardPoint" jdbcType="DECIMAL"/>
+        <result column="expiration_date" property="expirationDate" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id
+        , import_date, pid_no, bank_no, bank_name, reward_point, expiration_date
+    </sql>
+
+
+    <select id="selectInfo" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_import_temp
+    </select>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO t_import_temp (import_date, pid_no, bank_no, bank_name, reward_point, expiration_date)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.importDate,jdbcType = VARCHAR},
+            #{item.pidNo,jdbcType = VARCHAR},
+            #{item.bankNo,jdbcType = VARCHAR},
+            #{item.bankName,jdbcType = VARCHAR},
+            #{item.rewardPoint,jdbcType = VARCHAR},
+            #{item.expirationDate,jdbcType = VARCHAR}
+            )
+        </foreach>
+    </insert>
+
+    <!--查询所有页面数据-->
+    <!--    <select id="selectEpassDeviceWhiteList" resultMap="BaseResultMap">-->
+    <!--        select-->
+    <!--        <include refid="Base_Column_List"/>-->
+    <!--        from eiop_omg_epass_device-->
+    <!--        where status = #{status}-->
+    <!--        and last_update_time >= #{batchDateStart}-->
+    <!--        and last_update_time &lt;= #{batchDateEnd}-->
+    <!--        and id > #{autoId}-->
+    <!--        limit #{pageSize}-->
+    <!--    </select>-->
+
+
+</mapper>
