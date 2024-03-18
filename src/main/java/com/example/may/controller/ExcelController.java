@@ -99,6 +99,8 @@ public class ExcelController {
             ExcelUtil.readBySax(is, 0, (sheetIndex, rowIndex, rowList) -> {
                 // 去除标题行
                 //判断第一行表头，和需要读取的表头数据是否一直
+                //跳过空行
+
                 if (rowIndex == 0) {
                     //跳过空行
                     if (rowList == null || rowList.size() == 0 || rowList.get(0).equals("")) {
@@ -108,6 +110,7 @@ public class ExcelController {
                 }
                 // 第2行开始，一次读取一行数据
                 if (rowIndex > 1) {
+
                     //验证是否满足导入条件(格式+数据库查重)
                     HeadImportDataInfo headImportDataInfo = validExcelData(rowList, writer, rowIndex, custList);
                     System.out.println("第" + rowIndex + "行:" + headImportDataInfo);
@@ -131,7 +134,6 @@ public class ExcelController {
                 excelService.insertByExecutorService(excelDTOList);
 
             }
-
 
             // 每次导出都初始化样式map，避免非同源错误
             this.styleMap = new HashMap<String, CellStyle>();
@@ -277,6 +279,11 @@ public class ExcelController {
      * @return 参数校验失败则返回null， 校验成功则返回 ArtisanExcelDTO 对象
      */
     private HeadImportDataInfo validExcelData(List<Object> rowList, ExcelWriter writer, Long sort, List<String> custList) {
+
+        //1、校验整行空数据
+        if (isNull(rowList) == 0) {
+            return null;
+        }
         // 错误描述
         StringBuilder errorDesc = new StringBuilder();
         // 标黄单元格列表
@@ -295,10 +302,10 @@ public class ExcelController {
             // 写入本行数据
             writer.writeRow(rowList);
             // 创建样式并设置背景颜色为黄色
-            CellStyle cellStyle = createCellStyle(writer);
-            for (Integer col : cols) {
-                writer.setStyle(cellStyle, col, writer.getRowCount() - 1);
-            }
+//            CellStyle cellStyle = createCellStyle(writer);
+//            for (Integer col : cols) {
+//                writer.setStyle(cellStyle, col, writer.getRowCount() - 1);
+//            }
             return null;
         }
     }
@@ -337,6 +344,22 @@ public class ExcelController {
         cellStyle.setAlignment(HorizontalAlignment.CENTER);
         cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
         return cellStyle;
+    }
+
+    /**
+     * 校验表格每一行是否是空数据<br/>
+     * 对一整行空数据过滤
+     *
+     * @return 是否一整行是空数据
+     */
+    private int isNull(List<Object> rowList) {
+        int empty = 0;
+        for (Object o : rowList) {
+            if (o != null && !"".equals(o) && !" ".equals(o)) {
+                empty++;
+            }
+        }
+        return empty;
     }
 
 }

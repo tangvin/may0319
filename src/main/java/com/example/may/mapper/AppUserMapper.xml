@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.may.mapper.AppUserMapper">
+    <resultMap id="BaseResultMap" type="com.example.may.po.AppUser">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="pid_no" property="pidNo" jdbcType="VARCHAR"/>
+        <result column="bank_no" property="bankNo" jdbcType="VARCHAR"/>
+        <result column="bank_name" property="bankName" jdbcType="VARCHAR"/>
+        <result column="remain_point" property="remainPoint" jdbcType="DECIMAL"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, pid_no,  bank_no, bank_name, remain_point
+    </sql>
+
+
+    <select id="selectInfo" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_app_user
+    </select>
+
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO t_app_user ( pid_no, bank_no, bank_name, remain_point)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            #{item.pidNo,jdbcType = VARCHAR},
+            #{item.bankNo,jdbcType = VARCHAR},
+            #{item.bankName,jdbcType = VARCHAR},
+            #{item.rewardPoint,jdbcType = VARCHAR},
+            )
+        </foreach>
+    </insert>
+
+    <!--查询所有页面数据-->
+    <!--    <select id="selectEpassDeviceWhiteList" resultMap="BaseResultMap">-->
+    <!--        select-->
+    <!--        <include refid="Base_Column_List"/>-->
+    <!--        from eiop_omg_epass_device-->
+    <!--        where status = #{status}-->
+    <!--        and last_update_time >= #{batchDateStart}-->
+    <!--        and last_update_time &lt;= #{batchDateEnd}-->
+    <!--        and id > #{autoId}-->
+    <!--        limit #{pageSize}-->
+    <!--    </select>-->
+
+
+</mapper>
