@@ -43,7 +43,9 @@ import java.util.stream.IntStream;
 public class ExcelController {
 
 
-    /** 全局样式map，避免【The maximum number of Cell Styles was exceeded. You can define up to 64000 style in a .xlsx Workbook】 */
+    /**
+     * 全局样式map，避免【The maximum number of Cell Styles was exceeded. You can define up to 64000 style in a .xlsx Workbook】
+     */
     private Map<String, CellStyle> styleMap = new HashMap<String, CellStyle>();
 
     @Autowired
@@ -96,6 +98,7 @@ public class ExcelController {
             List<HeadImportDataInfo> excelDTOList = new ArrayList<>();
             //收集客户号
             List<String> custList = new ArrayList<>();
+            long l1 = System.currentTimeMillis();
             ExcelUtil.readBySax(is, 0, (sheetIndex, rowIndex, rowList) -> {
                 // 去除标题行
                 //判断第一行表头，和需要读取的表头数据是否一直
@@ -108,6 +111,7 @@ public class ExcelController {
                     }
                     System.out.println("这是第一行表头数据:" + rowList);
                 }
+
                 // 第2行开始，一次读取一行数据
                 if (rowIndex > 1) {
 
@@ -120,6 +124,7 @@ public class ExcelController {
                     }
                 }
             });
+            System.out.println("校验耗时：" + (System.currentTimeMillis() - l1) + " ms");
             // 无法导入的用户数量
             int errorRowCount = writer.getPhysicalRowCount();
             // 校验成功行数
@@ -128,7 +133,7 @@ public class ExcelController {
 
 
             if (!CollectionUtils.isEmpty(excelDTOList)) {
-                System.out.println("校验成功的数据 " + successRows+" 条");
+                System.out.println("校验成功的数据 " + successRows + " 条");
                 System.out.println("准备数据入库。。。。。");
 //                excelService.insertByExecutorService(excelDTOList);
                 excelService.insertByExecutorService(excelDTOList);
@@ -156,7 +161,7 @@ public class ExcelController {
             }
 
 
-            System.out.println("校验+入库一共耗时："+ (System.currentTimeMillis() - l)/1000 +"s");
+            System.out.println("校验+入库一共耗时：" + (System.currentTimeMillis() - l) / 1000 + "s");
 
         } catch (Exception e) {
 
@@ -172,15 +177,12 @@ public class ExcelController {
         IntStream.range(0, 6).forEach(i -> {
             //i 表示 第几列
             String rowContent = null;
-            if (CollUtil.isEmpty(rowList)) {
+            if (CollUtil.isEmpty(rowList) && rowList.size() < 6) {
                 return;
             }
             Object obj = null;
-            System.out.println("i==>" + i);
-            System.out.println("rowList" + rowList);
             if (rowList.size() > 0 && rowList.get(i) != null) {
                 obj = rowList.get(i);
-                System.out.println("obj-->" + obj);
             }
             //去除前后空格
             if (obj != null) {
@@ -281,9 +283,9 @@ public class ExcelController {
     private HeadImportDataInfo validExcelData(List<Object> rowList, ExcelWriter writer, Long sort, List<String> custList) {
 
         //1、校验整行空数据
-        if (isNull(rowList) == 0) {
-            return null;
-        }
+//        if (isNull(rowList) == 0) {
+//            return null;
+//        }
         // 错误描述
         StringBuilder errorDesc = new StringBuilder();
         // 标黄单元格列表
@@ -323,7 +325,7 @@ public class ExcelController {
      */
     @NotNull
     public CellStyle createCellStyle(ExcelWriter writer) {
-        CellStyle cellStyle =null;
+        CellStyle cellStyle = null;
         // 判断全局样式集合
         if (this.styleMap.isEmpty()) {
             // 为空则创建
