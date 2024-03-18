@@ -117,11 +117,25 @@ public class ExcelController {
 
                     //验证是否满足导入条件(格式+数据库查重)
                     HeadImportDataInfo headImportDataInfo = validExcelData(rowList, writer, rowIndex, custList);
-                    System.out.println("第" + rowIndex + "行:" + headImportDataInfo);
                     //校验通过-通过的数据加入的list
                     if (headImportDataInfo != null) {
                         excelDTOList.add(headImportDataInfo);
                     }
+//                    //达到1000条操作数据库
+//                    if(!excelDTOList.isEmpty() && excelDTOList.size() % 1000 == 0){
+//                        System.out.println("这是第" + rowIndex + "行:");
+//                        System.out.println("excelDTOList条数:"+excelDTOList.size());
+//                        //操作数据库
+//                        operationDB(excelDTOList);
+//                    }
+//                    //不足1000条继续执行
+//                    if(!excelDTOList.isEmpty()){
+//                        System.out.println("这是第" + rowIndex + "行:");
+//                        System.out.println("excelDTOList条数:"+excelDTOList.size());
+//                        //操作数据库
+//                        operationDB(excelDTOList);
+//                    }
+
                 }
             });
             System.out.println("校验耗时：" + (System.currentTimeMillis() - l1) + " ms");
@@ -132,13 +146,13 @@ public class ExcelController {
             System.out.println("无法导入的用户数量=" + errorRowCount);
 
 
-            if (!CollectionUtils.isEmpty(excelDTOList)) {
-                System.out.println("校验成功的数据 " + successRows + " 条");
-                System.out.println("准备数据入库。。。。。");
+//            if (!CollectionUtils.isEmpty(excelDTOList)) {
+//                System.out.println("校验成功的数据 " + successRows + " 条");
+//                System.out.println("准备数据入库。。。。。");
+////                excelService.insertByExecutorService(excelDTOList);
 //                excelService.insertByExecutorService(excelDTOList);
-                excelService.insertByExecutorService(excelDTOList);
-
-            }
+//
+//            }
 
             // 每次导出都初始化样式map，避免非同源错误
             this.styleMap = new HashMap<String, CellStyle>();
@@ -362,6 +376,32 @@ public class ExcelController {
             }
         }
         return empty;
+    }
+
+    /**
+     * 操作数据库
+     * @param excelDTOList
+     */
+    private void operationDB(List<HeadImportDataInfo> excelDTOList) {
+        try {
+//            for (HeadImportDataInfo dataInfo : list) {
+//                HashMap<Object, Object> paraMap = new HashMap<>(3);
+//                paraMap.put("cgNumber", dataInfo.getCgNumber());
+//                paraMap.put("bak6", dataInfo.getBak6());
+//                paraMap.put("servicingTime", dataInfo.getServicingTime());
+//                int result = dataInfo.updateCustomerCount(paraMap);
+//                if (result > 0) {
+//                    //commit
+//                    successCount++;
+//                } else {
+//                    //rollback
+//                }
+//            }
+            excelService.insertByExecutorService(excelDTOList);
+            excelDTOList.clear();
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
     }
 
 }

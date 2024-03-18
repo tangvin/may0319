@@ -58,7 +58,6 @@ public class ExcelServiceImpl implements ExcelService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void insertByExecutorService(List<HeadImportDataInfo> list) {
-        long start = System.currentTimeMillis();
         if (CollUtil.isEmpty(list)) {
             return;
         }
@@ -72,7 +71,7 @@ public class ExcelServiceImpl implements ExcelService {
          *         int count = total / runSize;//5
          */
         // 10000 / 10 =  1000
-        int nThread = 10;
+        int nThread = 5;
         int total = list.size();
         Integer size = 1000;
         //开启的线程数  = 总页数
@@ -93,6 +92,5 @@ public class ExcelServiceImpl implements ExcelService {
             });
         }
         executorService.shutdown();
-        System.out.println("使用多线程批量插入耗时：" + (System.currentTimeMillis() - start) + "ms");
     }
 }
