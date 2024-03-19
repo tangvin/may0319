@@ -11,7 +11,7 @@
     <groupId>com.example</groupId>
     <artifactId>may</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>may</name>
+    <name>thread-excel</name>
     <description>may</description>
     <properties>
         <java.version>1.8</java.version>
