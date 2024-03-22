@@ -28,4 +28,4 @@ CREATE TABLE `t_import_temp` (
   `reward_point` decimal(20,0) DEFAULT NULL,
   `expiration_date` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=109999 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=109999 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '导入数据临时表';

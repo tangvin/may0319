@@ -26,4 +26,4 @@ CREATE TABLE `t_app_user` (
   `bank_no` varchar(20) DEFAULT NULL COMMENT '银行号',
   `bank_name` varchar(50) DEFAULT NULL COMMENT '银行名称',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '客户信息表';

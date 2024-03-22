@@ -21,12 +21,12 @@ SET FOREIGN_KEY_CHECKS=0;
 DROP TABLE IF EXISTS `t_integral_log`;
 CREATE TABLE `t_integral_log` (
   `id` bigint NOT NULL AUTO_INCREMENT,
-  `user_id` bigint DEFAULT NULL COMMENT '客户id',
-  `pid_no` varchar(20) DEFAULT NULL COMMENT '客户号',
+  `user_id` bigint DEFAULT NULL COMMENT 'app_user表的主键',
+  `pid_no` varchar(20) DEFAULT NULL COMMENT 'app_user表中的客户号',
   `changeType` varchar(1) DEFAULT NULL COMMENT '变化类型（1-增加 2-减少）',
   `num` decimal(20,0) DEFAULT NULL COMMENT '剩余可用积分',
   `bank_no` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL COMMENT '行号',
   `bank_name` varchar(50) DEFAULT NULL COMMENT '银行名称',
   `expiration_date` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '积分日志表，记录每个客户的积分变化情况';

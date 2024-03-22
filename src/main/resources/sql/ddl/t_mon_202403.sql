@@ -28,4 +28,4 @@ CREATE TABLE `t_mon_202403` (
   `reward_point` decimal(20,0) DEFAULT NULL,
   `expiration_date` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=260194 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=260194 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '每月积分表，也是导入临时表对应的正式表，审批之后将临时表数据迁移到该表';
