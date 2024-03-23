@@ -38,7 +38,7 @@ public class DataProcessingServiceImpl implements DataProcessingService {
         //t_import_temp  -->  t_mon_202403  这2张表结构一样
         appUserMapper.batInsQuery();
 
-        // 查询临时表总记录数，进行分页查询如下库
+        // 查询临时表总记录数，进行分页查询该表全量数据
         Integer totalCount = tImportTempMapper.countTImportTemp();
         // 总页数，每页5000条
         int pageSize = 5000;
