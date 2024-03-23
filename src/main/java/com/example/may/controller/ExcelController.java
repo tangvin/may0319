@@ -3,6 +3,7 @@ package com.example.may.controller;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.file.FileNameUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.ExcelUtil;
@@ -46,7 +47,7 @@ public class ExcelController {
     /**
      * 全局样式map，避免【The maximum number of Cell Styles was exceeded. You can define up to 64000 style in a .xlsx Workbook】
      */
-    private Map<String, CellStyle> styleMap = new HashMap<String, CellStyle>();
+    private Map<Integer, CellStyle> styleMap = new HashMap<Integer, CellStyle>();
 
     @Autowired
     ExcelService excelService;
@@ -80,71 +81,49 @@ public class ExcelController {
 
     //导入excel
     @PostMapping("/import")
-    public ReturnResult importExcel(@RequestParam("file") MultipartFile file) throws IOException {
+    public ReturnResult importExcel(@RequestParam("file") MultipartFile file) {
         long l = System.currentTimeMillis();
-        String originalFilename = file.getOriginalFilename();
-        String suffix = originalFilename.substring(originalFilename.lastIndexOf(".") + 1);
         if (file == null || file.isEmpty()) {
-            return ReturnResult.failed(HttpStatus.BAD_REQUEST.value(), "上传文件为空，请重新上传");
-        } else if (!suffix.equals("xls") && !suffix.equals("xlsx")) {
+            return ReturnResult.failed(HttpStatus.BAD_REQUEST.value(), "上传文件内容为空，请重新上传");
+        }
+        String suffix = FileNameUtil.getSuffix(file.getOriginalFilename());
+        if (!"xls".equals(suffix) && !"xlsx".equals(suffix)) {
             return ReturnResult.failed(HttpStatus.BAD_REQUEST.value(), "文件格式错误，请上传excel文件");
         }
 
         // 逐行分析表格数据，从 sheet=0 读取
-        try (InputStream is = file.getInputStream()) {
-            ExcelWriter writer = ExcelUtil.getWriter(true);
-            writer.renameSheet("导入错误提示数据提示");
-            // 可导入数据
-            List<HeadImportDataInfo> excelDTOList = new ArrayList<>();
-            //收集客户号
-            List<String> custList = new ArrayList<>();
-            long l1 = System.currentTimeMillis();
-            ExcelUtil.readBySax(is, 0, (sheetIndex, rowIndex, rowList) -> {
-                // 去除标题行
-                //判断第一行表头，和需要读取的表头数据是否一直
-                //跳过空行
+        ExcelWriter writer = ExcelUtil.getWriter(true);
+        writer.renameSheet("导入错误提示数据提示");
+        // 可导入数据
+        List<HeadImportDataInfo> excelDTOList = new ArrayList<>();
+        //收集客户号
+        List<String> custList = new ArrayList<>();
+        long l1 = System.currentTimeMillis();
 
-                if (rowIndex == 0) {
-                    //跳过空行
-                    if (rowList == null || rowList.size() == 0 || rowList.get(0).equals("")) {
-                        return;
-                    }
-                    System.out.println("这是第一行表头数据:" + rowList);
+        try {
+            ExcelUtil.readBySax(file.getInputStream(), 0, (sheetIndex, rowIndex, rowList) -> {
+                if (rowList.size() != 6) {
+                    // excel小于6列，不是模板给定的列数，抛出异常后不往下执行，catch捕获返回前端
+                    throw new RuntimeException("未能按照Excel模板填写数据！");
                 }
-
+                // 去除标题行
                 // 第2行开始，一次读取一行数据
                 if (rowIndex > 1) {
-
                     //验证是否满足导入条件(格式+数据库查重)
                     HeadImportDataInfo headImportDataInfo = validExcelData(rowList, writer, rowIndex, custList);
                     //校验通过-通过的数据加入的list
                     if (headImportDataInfo != null) {
                         excelDTOList.add(headImportDataInfo);
                     }
-//                    //达到1000条操作数据库
-//                    if(!excelDTOList.isEmpty() && excelDTOList.size() % 1000 == 0){
-//                        System.out.println("这是第" + rowIndex + "行:");
-//                        System.out.println("excelDTOList条数:"+excelDTOList.size());
-//                        //操作数据库
-//                        operationDB(excelDTOList);
-//                    }
-//                    //不足1000条继续执行
-//                    if(!excelDTOList.isEmpty()){
-//                        System.out.println("这是第" + rowIndex + "行:");
-//                        System.out.println("excelDTOList条数:"+excelDTOList.size());
-//                        //操作数据库
-//                        operationDB(excelDTOList);
-//                    }
-
                 }
             });
+
             System.out.println("校验耗时：" + (System.currentTimeMillis() - l1) + " ms");
             // 无法导入的用户数量
             int errorRowCount = writer.getPhysicalRowCount();
             // 校验成功行数
             int successRows = excelDTOList.size();
             System.out.println("无法导入的用户数量=" + errorRowCount);
-
 
 //            if (!CollectionUtils.isEmpty(excelDTOList)) {
 //                System.out.println("校验成功的数据 " + successRows + " 条");
@@ -155,14 +134,13 @@ public class ExcelController {
 //            }
 
             // 每次导出都初始化样式map，避免非同源错误
-            this.styleMap = new HashMap<String, CellStyle>();
-
+            this.styleMap = new HashMap<Integer, CellStyle>();
 
             // 将无法导入的用户列表写入到错误文件中
             if (errorRowCount > 0) {
                 String fileName = System.currentTimeMillis() + "_导入文件错误提示.xlsx";
                 // 把导入的错误信息xls文件，上传至服务器
-                String fileDir = "C:/template/error/";
+                String fileDir = "D:/";
                 String filePath = fileDir + fileName + "_" + "error.xlsx";
                 String absolutePath = FileUtil.getAbsolutePath(filePath);
                 System.out.println("absolutePath-->" + absolutePath);
@@ -173,15 +151,10 @@ public class ExcelController {
                 writer.close();
                 outputStream.close();
             }
-
-
-            System.out.println("校验+入库一共耗时：" + (System.currentTimeMillis() - l) / 1000 + "s");
-
         } catch (Exception e) {
-
-            e.printStackTrace();
+            return ReturnResult.failed(HttpStatus.BAD_REQUEST.value(), "导入失败，请您刷新页面重试");
         }
-
+        System.out.println("校验+入库一共耗时：" + (System.currentTimeMillis() - l) / 1000 + "s");
         return null;
     }
 
@@ -189,15 +162,9 @@ public class ExcelController {
         HeadImportDataInfo headImportDataInfo = new HeadImportDataInfo();
         //创建一个以1为增量步长，从start(包括)到end(不包括)的有序的数字流。
         IntStream.range(0, 6).forEach(i -> {
-            //i 表示 第几列
+            Object obj = rowList.get(i);
+            // i 表示 第几列
             String rowContent = null;
-            if (CollUtil.isEmpty(rowList) && rowList.size() < 6) {
-                return;
-            }
-            Object obj = null;
-            if (rowList.size() > 0 && rowList.get(i) != null) {
-                obj = rowList.get(i);
-            }
             //去除前后空格
             if (obj != null) {
                 rowContent = StrUtil.trim(obj.toString());
@@ -273,7 +240,6 @@ public class ExcelController {
                     headImportDataInfo.setExpirationDate(rowContent);
                 }
             }
-
         });
         if (StrUtil.isNotBlank(errorDesc)) {
             // 去除最后一个分隔符
@@ -295,11 +261,11 @@ public class ExcelController {
      * @return 参数校验失败则返回null， 校验成功则返回 ArtisanExcelDTO 对象
      */
     private HeadImportDataInfo validExcelData(List<Object> rowList, ExcelWriter writer, Long sort, List<String> custList) {
-
         //1、校验整行空数据
-//        if (isNull(rowList) == 0) {
-//            return null;
-//        }
+        if (isNull(rowList) == 0) {
+            return null;
+        }
+
         // 错误描述
         StringBuilder errorDesc = new StringBuilder();
         // 标黄单元格列表
@@ -310,7 +276,6 @@ public class ExcelController {
 
         // todo 3、如果无单元格需要标黄，则证明本行数据验证成功
         if (cols.isEmpty() && headImportDataInfo != null) {
-//            HeadImportDataInfo headImportData = assembleData(rowList);
             return headImportDataInfo;
         } else {
             // 将错误原因写入最后一列
@@ -318,10 +283,10 @@ public class ExcelController {
             // 写入本行数据
             writer.writeRow(rowList);
             // 创建样式并设置背景颜色为黄色
-//            CellStyle cellStyle = createCellStyle(writer);
-//            for (Integer col : cols) {
-//                writer.setStyle(cellStyle, col, writer.getRowCount() - 1);
-//            }
+            CellStyle cellStyle = createCellStyle(writer);
+            for (Integer col : cols) {
+                writer.setStyle(cellStyle, col, writer.getRowCount() - 1);
+            }
             return null;
         }
     }
@@ -339,16 +304,11 @@ public class ExcelController {
      */
     @NotNull
     public CellStyle createCellStyle(ExcelWriter writer) {
-        CellStyle cellStyle = null;
-        // 判断全局样式集合
-        if (this.styleMap.isEmpty()) {
-            // 为空则创建
-            cellStyle = writer.createCellStyle();
-            this.styleMap.put("1", cellStyle);
-        } else {
-            cellStyle = this.styleMap.get("1");
+        if (!this.styleMap.isEmpty()) {
+            return this.styleMap.get(1);
         }
-//        CellStyle cellStyle = writer.createCellStyle();
+        // 为空则创建
+        CellStyle cellStyle = writer.createCellStyle();
         cellStyle.setFillForegroundColor(IndexedColors.YELLOW.getIndex());
         cellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         // 设置四周边框
@@ -359,6 +319,7 @@ public class ExcelController {
         // 设置内容居中对齐
         cellStyle.setAlignment(HorizontalAlignment.CENTER);
         cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        this.styleMap.put(1, cellStyle);
         return cellStyle;
     }
 
