@@ -3,6 +3,7 @@ package com.example.may.controller;
 import cn.hutool.poi.excel.ExcelUtil;
 import cn.hutool.poi.excel.ExcelWriter;
 import com.example.may.po.HeadImportDataInfo;
+import com.example.may.service.DataProcessingService;
 import com.example.may.service.ExcelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,8 +31,12 @@ public class HelloWord {
     @Autowired
     ExcelService excelService;
 
+    @Autowired
+    DataProcessingService dataProcessingService;
+
     @RequestMapping("/hello")
     public String hello(){
+        dataProcessingService.dataProcess();
         AtomicInteger atomicInteger = new AtomicInteger(1);
         int i = atomicInteger.get();
         System.out.println("==========="+i);

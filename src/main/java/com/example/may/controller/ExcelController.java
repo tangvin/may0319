@@ -125,16 +125,14 @@ public class ExcelController {
             int successRows = excelDTOList.size();
             System.out.println("无法导入的用户数量=" + errorRowCount);
 
-//            if (!CollectionUtils.isEmpty(excelDTOList)) {
-//                System.out.println("校验成功的数据 " + successRows + " 条");
-//                System.out.println("准备数据入库。。。。。");
-////                excelService.insertByExecutorService(excelDTOList);
-//                excelService.insertByExecutorService(excelDTOList);
-//
-//            }
+            if (!CollectionUtils.isEmpty(excelDTOList)) {
+                System.out.println("校验成功的数据 " + successRows + " 条");
+                System.out.println("准备数据入库。。。。。");
+                excelService.insertByExecutorService(excelDTOList);
+            }
 
             // 每次导出都初始化样式map，避免非同源错误
-            this.styleMap = new HashMap<Integer, CellStyle>();
+//            this.styleMap = new HashMap<Integer, CellStyle>();
 
             // 将无法导入的用户列表写入到错误文件中
             if (errorRowCount > 0) {

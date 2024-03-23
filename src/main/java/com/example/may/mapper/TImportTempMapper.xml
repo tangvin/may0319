@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.example.may.mapper.TImportTempMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.may.po.TImportTemp">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="import_date" property="importDate" jdbcType="VARCHAR"/>
+        <result column="pid_no" property="pidNo" jdbcType="VARCHAR"/>
+        <result column="bank_no" property="bankNo" jdbcType="VARCHAR"/>
+        <result column="bank_name" property="bankName" jdbcType="VARCHAR"/>
+        <result column="reward_point" property="rewardPoint" jdbcType="DECIMAL"/>
+        <result column="expiration_date" property="expirationDate" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, import_date, pid_no, bank_no, bank_name, reward_point, expiration_date
+    </sql>
+
+    <select id="countTImportTemp" resultType="java.lang.Integer">
+        select count(id) from t_import_temp
+    </select>
+    <select id="selectPagedTemp" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM t_import_temp
+        ORDER BY id
+        LIMIT #{pageSize}
+        OFFSET #{offset}
+    </select>
+
+</mapper>

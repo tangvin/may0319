@@ -73,7 +73,7 @@ public class ExcelServiceImpl implements ExcelService {
         // 10000 / 10 =  1000
         int nThread = 5;
         int total = list.size();
-        Integer size = 1000;
+        Integer size = 5000;
         //开启的线程数  = 总页数
         Integer runSize = total % size == 0 ? total / size : total / size + 1;
         // 创建一个线程池，数量和开启线程的数量一样

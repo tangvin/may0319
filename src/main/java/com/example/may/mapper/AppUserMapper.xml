@@ -13,7 +13,6 @@
         id, pid_no,  bank_no, bank_name, remain_point
     </sql>
 
-
     <select id="selectInfo" resultMap="BaseResultMap">
         select
         <include refid="Base_Column_List"/>
@@ -24,13 +23,71 @@
         INSERT INTO t_app_user ( pid_no, bank_no, bank_name, remain_point)
         VALUES
         <foreach collection="list" item="item" index="index" separator=",">
-            #{item.pidNo,jdbcType = VARCHAR},
-            #{item.bankNo,jdbcType = VARCHAR},
-            #{item.bankName,jdbcType = VARCHAR},
-            #{item.rewardPoint,jdbcType = VARCHAR},
+            (
+             #{item.pidNo},
+            #{item.bankNo},
+            #{item.bankName},
+            #{item.remainPoint}
             )
         </foreach>
     </insert>
+
+
+
+
+    <insert id="batInsQuery">
+        INSERT INTO t_mon_202403 (import_date, pid_no, bank_no, bank_name, reward_point, expiration_date)
+        SELECT b.import_date,
+               b.pid_no,
+               b.bank_no,
+               b.bank_name,
+               b.reward_point,
+               b.expiration_date
+        FROM t_import_temp b
+        WHERE NOT EXISTS (SELECT c.import_date, c.pid_no, c.bank_no, c.bank_name, c.reward_point, c.expiration_date
+                          FROM t_mon_202403 c
+                          WHERE c.pid_no = b.pid_no);
+    </insert>
+
+    <select id="selectByPidNo" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_app_user
+        where FIND_IN_SET(pid_no, #{pidNos})
+    </select>
+
+    <!-- 该批量更新，需要开启mysql批量操作，默认关闭，数据库链接url增加开启：&allowMultiQueries=true -->
+<!--    <update id="batshUpdate">-->
+<!--        <foreach collection="list" item="item" index="index" separator=";">-->
+<!--            UPDATE t_app_user-->
+<!--            <set>-->
+<!--                pid_no = #{item.pidNo},-->
+<!--                bank_no = #{item.bankNo},-->
+<!--                bank_name = #{item.bankName},-->
+<!--                remain_point = #{item.remainPoint}-->
+<!--            </set>-->
+<!--            WHERE id = #{item.id}-->
+<!--        </foreach>-->
+<!--    </update>-->
+
+    <!-- 该语句更新需要设置 pid_no 字段唯一约束，如果是使用主键id更新则不需要另外设置唯一约束 -->
+    <insert id="batchInsertOrUpdate" parameterType="java.util.List">
+        INSERT INTO t_app_user (pid_no, bank_no, bank_name, remain_point)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.pidNo}, #{item.bankNo}, #{item.bankName}, #{item.remainPoint})
+        </foreach>
+        ON DUPLICATE KEY UPDATE
+        pid_no = VALUES(pid_no),
+        bank_no = VALUES(bank_no),
+        bank_name = VALUES(bank_name),
+        remain_point = VALUES(remain_point);
+    </insert>
+
+
+
+
+
 
     <!--查询所有页面数据-->
     <!--    <select id="selectEpassDeviceWhiteList" resultMap="BaseResultMap">-->

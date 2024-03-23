@@ -7,25 +7,18 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 
-/**
- * @description:
- * @author: Bruce_T
- * @date: 2024/03/16   11:14
- * @version: 1.0
- * @modified:
- */
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
-public class AppUser {
-
+@NoArgsConstructor
+public class TImportTemp {
 
     private Long id;
+    private String importDate;
     private String pidNo;
-    private BigDecimal remainPoint;
     private String bankNo;
     private String bankName;
-
+    private BigDecimal rewardPoint;
+    private String expirationDate;
 
 }
